@@ -14,17 +14,17 @@ Next steps (if I don't just forget about this and do other things):
 - write a script to test my interpreter behaves the same as some other popular
   interpreter(s).
 
-# Examples
+## Examples
 
 Some or all of the examples are taken from
 [this repo](https://github.com/fabianishere/brainfuck).
 
-# Running
+## Running
 
     $ cargo run --release -- examples/hello.bf
     $ cargo run --release -- examples/head.bf < src/bin/bf.rs
 
-# License
+## License
 
 This work is released to the public domain "under" the unlicense. See
 `LICENSE`.
