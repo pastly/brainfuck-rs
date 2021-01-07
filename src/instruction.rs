@@ -7,7 +7,7 @@ pub const CHAR_OUT: char = '.';
 pub const CHAR_BEGIN: char = '[';
 pub const CHAR_END: char = ']';
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Instruction {
     Left,
     Right,

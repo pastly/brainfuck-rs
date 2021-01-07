@@ -1,19 +1,15 @@
 use std::default::Default;
-use std::ops::{AddAssign, SubAssign};
 
 const TAPE_LEN: usize = 40_000;
 const TAPE_START: usize = 10_000;
 
 #[derive(Debug)]
-pub struct Tape<T> {
-    cells: [T; TAPE_LEN],
+pub struct Tape {
+    cells: [u8; TAPE_LEN],
     ptr: usize,
 }
 
-impl<T> Tape<T>
-where
-    T: Incrementable,
-{
+impl Tape {
     pub fn left(&mut self) {
         self.ptr -= 1;
     }
@@ -21,57 +17,24 @@ where
         self.ptr += 1;
     }
     pub fn inc(&mut self) {
-        self.cells[self.ptr].post_inc();
+        self.cells[self.ptr] = self.cells[self.ptr].wrapping_add(1);
     }
     pub fn dec(&mut self) {
-        self.cells[self.ptr].post_dec();
+        self.cells[self.ptr] = self.cells[self.ptr].wrapping_sub(1);
     }
-    pub fn put(&mut self, v: T) {
+    pub fn put(&mut self, v: u8) {
         self.cells[self.ptr] = v;
     }
-    pub fn get(&self) -> T {
+    pub fn get(&self) -> u8 {
         self.cells[self.ptr]
     }
 }
 
-impl<T> Default for Tape<T>
-where
-    T: Default + Copy,
-{
+impl Default for Tape {
     fn default() -> Self {
         Self {
-            cells: [T::default(); TAPE_LEN],
+            cells: [0; TAPE_LEN],
             ptr: TAPE_START,
         }
     }
 }
-
-pub trait Incrementable: Copy + AddAssign<Self> + SubAssign<Self> {
-    fn one() -> Self;
-
-    fn post_inc(&mut self) -> Self {
-        self.post_inc_by(Self::one())
-    }
-
-    fn post_inc_by(&mut self, n: Self) -> Self {
-        let tmp = *self;
-        *self += n;
-        tmp
-    }
-
-    fn post_dec(&mut self) -> Self {
-        self.post_dec_by(Self::one())
-    }
-
-    fn post_dec_by(&mut self, n: Self) -> Self {
-        let tmp = *self;
-        *self -= n;
-        tmp
-    }
-}
-
-macro_rules! impl_Incrementable{
-    ($($m:ty),*) => {$( impl Incrementable for $m  { fn one() -> Self { 1 as $m } })*}
-}
-
-impl_Incrementable! {u8, u16, u32, u64, i8, i16, i32, i64, f32, f64}

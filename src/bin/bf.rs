@@ -4,8 +4,6 @@ use std::default::Default;
 use std::fs::File;
 use std::io::{self, Read};
 
-type Cell = u8;
-
 struct InstructionIter {
     fd: Box<dyn Read>,
 }
@@ -48,26 +46,52 @@ fn main() -> io::Result<()> {
     let args = std::env::args().collect::<Vec<_>>();
     let code_fname = &args[1];
 
-    let mut tape: Tape<Cell> = Default::default();
-    let mut code = vec![];
-    let mut loop_starts = vec![];
+    let mut tape: Tape = Default::default();
+    let mut loop_starts: Vec<usize> = vec![];
 
     let stdin = io::stdin();
     let mut input_bytes = stdin.lock().bytes();
-    let instructions = InstructionIter::new(Box::new(File::open(code_fname)?));
-    for inst in instructions {
+    let code = InstructionIter::new(Box::new(File::open(code_fname)?)).collect::<Vec<_>>();
+    let mut code_ptr = 0;
+    while code_ptr < code.len() {
+        let inst = &code[code_ptr];
         match inst {
             Instruction::Left => tape.left(),
             Instruction::Right => tape.right(),
             Instruction::Increment => tape.inc(),
             Instruction::Decrement => tape.dec(),
             Instruction::In => tape.put(input_bytes.next().unwrap().unwrap()),
-            Instruction::Out => print!("{}", tape.get()),
-            Instruction::Begin => unreachable!(),
-            Instruction::End => unreachable!(),
+            Instruction::Out => print!("{}", tape.get() as char),
+            Instruction::Begin => {
+                if tape.get() != 0 {
+                    loop_starts.push(code_ptr);
+                } else {
+                    let mut ends_needed = 1;
+                    loop {
+                        code_ptr += 1;
+                        if code[code_ptr] == Instruction::Begin {
+                            ends_needed += 1;
+                        } else if code[code_ptr] == Instruction::End {
+                            ends_needed -= 1;
+                        }
+                        if ends_needed == 0 {
+                            break;
+                        }
+                    }
+                    assert_eq!(code[code_ptr], Instruction::End);
+                }
+            }
+            Instruction::End => {
+                if tape.get() != 0 {
+                    code_ptr = loop_starts[loop_starts.len() - 1];
+                } else {
+                    loop_starts.pop();
+                }
+            }
             _ => unreachable!(),
-        }
-        println!("{:?}", inst);
+        };
+        code_ptr += 1;
+        //println!("{:?}", inst);
     }
     Ok(())
 }
