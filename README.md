@@ -22,7 +22,7 @@ Some or all of the examples are taken from
 # Running
 
     $ cargo run --release -- examples/hello.bf
-    $ cargo run --release -- examples/head.bf < src/main.rs
+    $ cargo run --release -- examples/head.bf < src/bin/bf.rs
 
 # License
 
