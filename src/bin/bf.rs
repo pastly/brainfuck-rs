@@ -2,7 +2,7 @@ use brainfuck::instruction::*;
 use brainfuck::tape::Tape;
 use std::default::Default;
 use std::fs::File;
-use std::io::{self, Read};
+use std::io::{self, Read, Write};
 
 struct InstructionIter {
     fd: Box<dyn Read>,
@@ -49,6 +49,8 @@ fn main() -> io::Result<()> {
     let mut tape: Tape = Default::default();
     let mut loop_starts: Vec<usize> = vec![];
 
+    let mut out = std::io::stdout();
+
     let stdin = io::stdin();
     let mut input_bytes = stdin.lock().bytes();
     let code = InstructionIter::new(Box::new(File::open(code_fname)?)).collect::<Vec<_>>();
@@ -61,7 +63,10 @@ fn main() -> io::Result<()> {
             Instruction::Increment => tape.inc(),
             Instruction::Decrement => tape.dec(),
             Instruction::In => tape.put(input_bytes.next().unwrap().unwrap()),
-            Instruction::Out => print!("{}", tape.get() as char),
+            Instruction::Out => {
+                out.write_all(&[tape.get()]).unwrap();
+                //out.flush().unwrap();
+            }
             Instruction::Begin => {
                 if tape.get() != 0 {
                     loop_starts.push(code_ptr);
