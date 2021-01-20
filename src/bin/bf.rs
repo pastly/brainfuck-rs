@@ -1,5 +1,6 @@
 use brainfuck::instruction::*;
 use brainfuck::tape::Tape;
+use brainfuck::EOFAction;
 use std::default::Default;
 use std::fs::File;
 use std::io::{self, Read, Write};
@@ -48,6 +49,7 @@ fn main() -> io::Result<()> {
 
     let mut tape: Tape = Default::default();
     let mut loop_starts: Vec<usize> = vec![];
+    let eof_action = EOFAction::Zero;
 
     let mut out = std::io::stdout();
 
@@ -62,7 +64,17 @@ fn main() -> io::Result<()> {
             Instruction::Right => tape.right(),
             Instruction::Increment => tape.inc(),
             Instruction::Decrement => tape.dec(),
-            Instruction::In => tape.put(input_bytes.next().unwrap().unwrap()),
+            Instruction::In => {
+                if let Some(Ok(next_byte)) = input_bytes.next() {
+                    tape.put(next_byte)
+                } else {
+                    match eof_action {
+                        EOFAction::Zero => tape.put(0),
+                        EOFAction::NegativeOne => tape.put(255),
+                        EOFAction::NoChange => {},
+                    }
+                }
+            }
             Instruction::Out => {
                 out.write_all(&[tape.get()]).unwrap();
                 //out.flush().unwrap();
