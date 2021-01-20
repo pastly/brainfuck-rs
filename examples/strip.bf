@@ -45,7 +45,6 @@ This work is released to the public domain "under" the unlicense. See LICENSE.]
         ++++++++++++++++++++
         ++++++++++++++++++++
         +++++
-        Print and clear it
         .
     >-]<
 
@@ -67,7 +66,6 @@ This work is released to the public domain "under" the unlicense. See LICENSE.]
         ++++++++++++++++++++
         ++++++++++++++++++++
         ++++
-        Print and clear it
         .
     >-]<
 
@@ -89,7 +87,6 @@ This work is released to the public domain "under" the unlicense. See LICENSE.]
         ++++++++++++++++++++
         ++++++++++++++++++++
         ++++++
-        Print and clear it
         .
     >-]<
 
@@ -120,7 +117,6 @@ This work is released to the public domain "under" the unlicense. See LICENSE.]
         ++++++++++++++++++++
         ++++++++++
         +
-        Print and clear it
         .
     >-]<
 
@@ -151,7 +147,6 @@ This work is released to the public domain "under" the unlicense. See LICENSE.]
         ++++++++++++++++++++
         ++++++++++
         +++
-        Print and clear it
         .
     >-]<
 
@@ -173,7 +168,6 @@ This work is released to the public domain "under" the unlicense. See LICENSE.]
         ++++++++++++++++++++
         ++++++++++++++++++++
         ++++++++++++++++++++
-        Print and clear it
         .
     >-]<
 
@@ -198,7 +192,6 @@ This work is released to the public domain "under" the unlicense. See LICENSE.]
         ++++++++++++++++++++
         ++++++++++++++++++++
         ++
-        Print and clear it
         .
     >-]<
 
