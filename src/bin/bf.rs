@@ -1,47 +1,10 @@
 use brainfuck::instruction::*;
+use brainfuck::pseudo_instruction::{PseudoInst, PseudoInstIter};
 use brainfuck::tape::Tape;
 use brainfuck::EOFAction;
 use std::default::Default;
 use std::fs::File;
 use std::io::{self, Read, Write};
-
-struct InstructionIter {
-    fd: Box<dyn Read>,
-}
-
-impl InstructionIter {
-    fn new(fd: Box<dyn Read>) -> Self {
-        Self { fd }
-    }
-}
-
-impl Iterator for InstructionIter {
-    type Item = Instruction;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let mut buf: [u8; 1] = [0];
-        loop {
-            match self.fd.read(&mut buf) {
-                Ok(n) => match n {
-                    // 0 => break Some(Instruction::EOF),
-                    0 => break None,
-                    _ => match buf[0] as char {
-                        CHAR_LEFT => break Some(Instruction::Left),
-                        CHAR_RIGHT => break Some(Instruction::Right),
-                        CHAR_INC => break Some(Instruction::Increment),
-                        CHAR_DEC => break Some(Instruction::Decrement),
-                        CHAR_IN => break Some(Instruction::In),
-                        CHAR_OUT => break Some(Instruction::Out),
-                        CHAR_BEGIN => break Some(Instruction::Begin),
-                        CHAR_END => break Some(Instruction::End),
-                        _ => continue,
-                    },
-                },
-                Err(_e) => break None,
-            }
-        }
-    }
-}
 
 fn main() -> io::Result<()> {
     let args = std::env::args().collect::<Vec<_>>();
@@ -55,54 +18,73 @@ fn main() -> io::Result<()> {
 
     let stdin = io::stdin();
     let mut input_bytes = stdin.lock().bytes();
-    let code = InstructionIter::new(Box::new(File::open(code_fname)?)).collect::<Vec<_>>();
+    let code = InstIter::new(Box::new(File::open(code_fname)?));
+    let code: Vec<PseudoInst> = PseudoInstIter::new(code).collect();
     let mut code_ptr = 0;
     while code_ptr < code.len() {
-        let inst = &code[code_ptr];
-        match inst {
-            Instruction::Left => tape.left(),
-            Instruction::Right => tape.right(),
-            Instruction::Increment => tape.inc(),
-            Instruction::Decrement => tape.dec(),
-            Instruction::In => {
-                if let Some(Ok(next_byte)) = input_bytes.next() {
-                    tape.put(next_byte)
-                } else {
-                    match eof_action {
-                        EOFAction::Zero => tape.put(0),
-                        EOFAction::NegativeOne => tape.put(255),
-                        EOFAction::NoChange => {},
+        let pi = &code[code_ptr];
+        match pi {
+            PseudoInst::Plain(inst) => match inst {
+                Inst::Left
+                | Inst::Right
+                | Inst::Increment
+                | Inst::Decrement
+                | Inst::In
+                | Inst::Out => unreachable!(),
+                Inst::Begin => {
+                    if tape.get() != 0 {
+                        loop_starts.push(code_ptr);
+                    } else {
+                        let mut ends_needed = 1;
+                        loop {
+                            code_ptr += 1;
+                            if code[code_ptr] == PseudoInst::Plain(Inst::Begin) {
+                                ends_needed += 1;
+                            } else if code[code_ptr] == PseudoInst::Plain(Inst::End) {
+                                ends_needed -= 1;
+                            }
+                            if ends_needed == 0 {
+                                break;
+                            }
+                        }
+                        assert_eq!(code[code_ptr], PseudoInst::Plain(Inst::End));
                     }
                 }
-            }
-            Instruction::Out => {
-                out.write_all(&[tape.get()]).unwrap();
-                //out.flush().unwrap();
-            }
-            Instruction::Begin => {
-                if tape.get() != 0 {
-                    loop_starts.push(code_ptr);
-                } else {
-                    let mut ends_needed = 1;
-                    loop {
-                        code_ptr += 1;
-                        if code[code_ptr] == Instruction::Begin {
-                            ends_needed += 1;
-                        } else if code[code_ptr] == Instruction::End {
-                            ends_needed -= 1;
-                        }
-                        if ends_needed == 0 {
-                            break;
+                Inst::End => {
+                    if tape.get() != 0 {
+                        code_ptr = loop_starts[loop_starts.len() - 1];
+                    } else {
+                        loop_starts.pop();
+                    }
+                }
+                _ => unreachable!(),
+            },
+            PseudoInst::Repeat(inst, n) => {
+                match inst {
+                    Inst::Left => tape.left(*n),
+                    Inst::Right => tape.right(*n),
+                    Inst::Increment => tape.inc(*n as u8),
+                    Inst::Decrement => tape.dec(*n as u8),
+                    Inst::In => {
+                        for _ in 0..*n {
+                            if let Some(Ok(next_byte)) = input_bytes.next() {
+                                tape.put(next_byte)
+                            } else {
+                                match eof_action {
+                                    EOFAction::Zero => tape.put(0),
+                                    EOFAction::NegativeOne => tape.put(255),
+                                    EOFAction::NoChange => {}
+                                }
+                            }
                         }
                     }
-                    assert_eq!(code[code_ptr], Instruction::End);
-                }
-            }
-            Instruction::End => {
-                if tape.get() != 0 {
-                    code_ptr = loop_starts[loop_starts.len() - 1];
-                } else {
-                    loop_starts.pop();
+                    Inst::Out => {
+                        for _ in 0..*n {
+                            out.write_all(&[tape.get()]).unwrap();
+                            //out.flush().unwrap();
+                        }
+                    }
+                    Inst::Begin | Inst::End | Inst::EOF => unreachable!(),
                 }
             }
             _ => unreachable!(),

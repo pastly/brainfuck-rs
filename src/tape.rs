@@ -10,17 +10,17 @@ pub struct Tape {
 }
 
 impl Tape {
-    pub fn left(&mut self) {
-        self.ptr -= 1;
+    pub fn left(&mut self, n: usize) {
+        self.ptr -= n;
     }
-    pub fn right(&mut self) {
-        self.ptr += 1;
+    pub fn right(&mut self, n: usize) {
+        self.ptr += n;
     }
-    pub fn inc(&mut self) {
-        self.cells[self.ptr] = self.cells[self.ptr].wrapping_add(1);
+    pub fn inc(&mut self, n: u8) {
+        self.cells[self.ptr] = self.cells[self.ptr].wrapping_add(n);
     }
-    pub fn dec(&mut self) {
-        self.cells[self.ptr] = self.cells[self.ptr].wrapping_sub(1);
+    pub fn dec(&mut self, n: u8) {
+        self.cells[self.ptr] = self.cells[self.ptr].wrapping_sub(n);
     }
     pub fn put(&mut self, v: u8) {
         self.cells[self.ptr] = v;
