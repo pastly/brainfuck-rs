@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import subprocess
+import time
 from subprocess import run
 
 
@@ -20,9 +21,11 @@ def test_one_byte_adder():
     print('PASS', 'one byte adder')
 
 def test_mandelbrot():
+    start = time.time()
     proc = run(['bash', '-c', f'{BIN} examples/mandelbrot-titannic.bf | head -n 50 | sha256sum'], capture_output=True)
+    dur = time.time() - start
     assert b'2f9e8599109e0dec2dcd' in proc.stdout
-    print('PASS', 'mandelbrot')
+    print('PASS', 'mandelbrot', f'{dur:0.3f}s')
 
 def test_combine_inc_dec():
     proc = run(f'{BIN} tests/combine-inc-dec.bf'.split(), capture_output=True)
