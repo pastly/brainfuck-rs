@@ -1,5 +1,5 @@
 use brainfuck::instruction::*;
-use brainfuck::pseudo_instruction::PseudoInst;
+use brainfuck::pseudo_instruction::{optimize, PseudoInst};
 use brainfuck::tape::Tape;
 use brainfuck::EOFAction;
 use std::default::Default;
@@ -18,10 +18,16 @@ fn main() -> io::Result<()> {
 
     let stdin = io::stdin();
     let mut input_bytes = stdin.lock().bytes();
-    let code = Vec::from(InstIter::new(Box::new(File::open(code_fname)?)));
+    let mut code = Vec::from(InstIter::new(Box::new(File::open(code_fname)?)));
+    while optimize(&mut code) > 0 {}
+    //for (idx, c) in code.iter().enumerate() {
+    //    println!("{} {:?}", idx, c);
+    //}
+    //return Ok(());
     let mut code_ptr = 0;
     while code_ptr < code.len() {
         let pi = &code[code_ptr];
+        //println!("{:?}", pi);
         match pi {
             PseudoInst::Plain(inst) => match inst {
                 Inst::Left
@@ -86,6 +92,7 @@ fn main() -> io::Result<()> {
                     Inst::Begin | Inst::End | Inst::EOF => unreachable!(),
                 }
             }
+            PseudoInst::SetValue(n) => tape.put(*n),
             _ => unreachable!(),
         };
         code_ptr += 1;
