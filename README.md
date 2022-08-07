@@ -5,9 +5,9 @@ interpreter.
 
 The only optimization I'm currently planning on:
 
-- coalescing repeated instructions,
-- transforming trivial/obvious instruction series (e.g. `[-]`) into a
-  pseudo-instruction
+- [x] coalescing repeated instructions,
+- [.] transforming trivial/obvious instruction series (e.g. `[-]`) into a pseudo-instruction
+  - [x] `[-]` into `SetValue(0)`
 
 Next steps (if I don't just forget about this and do other things):
 
