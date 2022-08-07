@@ -1,0 +1,58 @@
+-------------------------------------------------------------------------------
+commit b6f0083797c0403ddae43d9612cf6963d3128c55 (HEAD, origin/master)
+Author: Matt Traudt <sirmatt@ksu.edu>
+Date:   Wed Jan 20 17:42:28 2021 -0500
+
+    strip, but with wrapping
+
+
+matt@spacecow:~/src/brainfuck$ time (cargo run --release --bin bf -- examples/mandelbrot-titannic.bf | head -n 50 | sha256sum) 
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/bf examples/mandelbrot-titannic.bf`
+2f9e8599109e0dec2dcd4b31ba069b498f23bf1d5cd611b8a47d27418f7f1efb  -
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Os { code: 32, kind: BrokenPipe, message: "Broken pipe" }', src/bin/bf.rs:79:46
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+real	1m49.248s
+user	1m49.220s
+sys	0m0.024s
+-------------------------------------------------------------------------------
+commit 785597649774a46abf315136b512aab368ace1a0 (HEAD -> master)
+Author: Matt Traudt <sirmatt@ksu.edu>
+Date:   Tue Aug 2 20:33:57 2022 -0400
+
+    Combine repeated instructions
+    
+    Works on inc, dec, left, right, in, and out.
+
+matt@spacecow:~/src/brainfuck$ time (cargo run --release --bin bf -- examples/mandelbrot-titannic.bf | head -n 50 | sha256sum)
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/bf examples/mandelbrot-titannic.bf`
+2f9e8599109e0dec2dcd4b31ba069b498f23bf1d5cd611b8a47d27418f7f1efb  -
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Os { code: 32, kind: BrokenPipe, message: "Broken pipe" }', src/bin/bf.rs:83:58
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+real	0m33.624s
+user	0m33.606s
+sys	0m0.016s
+-------------------------------------------------------------------------------
+
+Notes: time improvement here does not seem to be releated to code improvements
+since last commit. Rerunning previous commit resulted in a 30s time, not 33s.
+
+commit c1c4c7c2d29b9860b34d3b2b03ea96fc0e3a518f
+Author: Matt Traudt <sirmatt@ksu.edu>
+Date:   Sun Aug 7 08:13:21 2022 -0400
+
+    Simplify pseudo inst construction. No need for Iter
+
+matt@spacecow:~/src/brainfuck$ time (cargo run --release --bin bf -- examples/mandelbrot-titannic.bf | head -n 50 | sha256sum)
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/bf examples/mandelbrot-titannic.bf`
+2f9e8599109e0dec2dcd4b31ba069b498f23bf1d5cd611b8a47d27418f7f1efb  -
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Os { code: 32, kind: BrokenPipe, message: "Broken pipe" }', src/bin/bf.rs:82:58
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+real	0m30.325s
+user	0m30.316s
+sys	0m0.012s
