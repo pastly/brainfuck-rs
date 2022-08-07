@@ -7,13 +7,8 @@ pub enum PseudoInst {
     Repeat(Inst, usize),
 }
 
-pub struct PseudoInstIter {
-    insts: Vec<PseudoInst>,
-    n: usize,
-}
-
-impl PseudoInstIter {
-    pub fn new(insts: InstIter) -> Self {
+impl From<InstIter> for Vec<PseudoInst> {
+    fn from(insts: InstIter) -> Self {
         let mut v = vec![];
         for inst in insts {
             let prev_pi = if !v.is_empty() {
@@ -46,19 +41,6 @@ impl PseudoInstIter {
             }
         }
         v.shrink_to_fit();
-        Self { insts: v, n: 0 }
-    }
-}
-
-impl Iterator for PseudoInstIter {
-    type Item = PseudoInst;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.n < self.insts.len() {
-            self.n += 1;
-            Some(self.insts[self.n - 1])
-        } else {
-            None
-        }
+        v
     }
 }

@@ -1,5 +1,5 @@
 use brainfuck::instruction::*;
-use brainfuck::pseudo_instruction::{PseudoInst, PseudoInstIter};
+use brainfuck::pseudo_instruction::PseudoInst;
 use brainfuck::tape::Tape;
 use brainfuck::EOFAction;
 use std::default::Default;
@@ -18,8 +18,7 @@ fn main() -> io::Result<()> {
 
     let stdin = io::stdin();
     let mut input_bytes = stdin.lock().bytes();
-    let code = InstIter::new(Box::new(File::open(code_fname)?));
-    let code: Vec<PseudoInst> = PseudoInstIter::new(code).collect();
+    let code = Vec::from(InstIter::new(Box::new(File::open(code_fname)?)));
     let mut code_ptr = 0;
     while code_ptr < code.len() {
         let pi = &code[code_ptr];
